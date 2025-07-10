@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
+import { uploadDocument } from "@/lib/api";
 
 interface UploadedFile {
   id: string
@@ -33,23 +34,46 @@ export default function UploadPage() {
     setFiles((prev) => [...prev, ...newFiles])
 
     // Simulate upload progress
-    newFiles.forEach((file) => {
+    newFiles.forEach((fileMeta, index) => {
+      const file = acceptedFiles[index]; // le vrai objet File
+
       const interval = setInterval(() => {
+      setFiles((prev) =>
+        prev.map((f) => {
+          if (f.id === fileMeta.id) {
+            const newProgress = Math.min(f.progress + Math.random() * 20, 95);
+            return { ...f, progress: newProgress };
+          }
+          return f;
+        })
+      );
+      }, 200);
+
+    // Appel réel à uploadDocument()
+    uploadDocument(file)
+      .then((result) => {
+        console.log("Upload result:", result);
+        clearInterval(interval);
         setFiles((prev) =>
-          prev.map((f) => {
-            if (f.id === file.id) {
-              const newProgress = f.progress + Math.random() * 30
-              if (newProgress >= 100) {
-                clearInterval(interval)
-                return { ...f, progress: 100, status: "success" }
-              }
-              return { ...f, progress: newProgress }
-            }
-            return f
-          }),
-        )
-      }, 200)
-    })
+          prev.map((f) =>
+            f.id === fileMeta.id
+              ? { ...f, progress: 100, status: "success" }
+              : f
+          )
+        );
+      })
+      .catch((err) => {
+        console.error("Upload error:", err);
+        clearInterval(interval);
+        setFiles((prev) =>
+          prev.map((f) =>
+            f.id === fileMeta.id
+              ? { ...f, progress: 100, status: "error" }
+              : f
+          )
+        );
+      });
+   });
   }, [])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({

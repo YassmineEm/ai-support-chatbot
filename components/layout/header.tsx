@@ -16,10 +16,14 @@ export function Header() {
     { name: "Settings", href: "/settings", icon: Settings },
   ]
 
+  const isAuthPage = pathname.startsWith("/auth")  
+
   return (
     <header className="sticky top-0 z-50 bg-ai-surface/80 backdrop-blur-xl border-b border-ai-border/50 shadow-elegant">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
+
+          {/* LOGO & TITLE */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-3 group">
               <div className="relative">
@@ -37,39 +41,58 @@ export function Header() {
             </Link>
           </div>
 
-          <nav className="hidden md:flex items-center space-x-1">
-            {navigation.map((item) => {
-              const Icon = item.icon
-              const isActive = pathname === item.href
-              return (
-                <Link key={item.name} href={item.href}>
-                  <Button
-                    variant="ghost"
-                    className={`relative flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-300 ${
-                      isActive
-                        ? "bg-gradient-to-r from-ai-blue to-ai-green text-white shadow-elegant"
-                        : "text-ai-text-light hover:text-ai-text hover:bg-ai-blue-light/50"
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span className="font-medium">{item.name}</span>
-                    {isActive && (
-                      <div className="absolute inset-0 bg-gradient-to-r from-ai-blue to-ai-green rounded-xl opacity-10"></div>
-                    )}
-                  </Button>
-                </Link>
-              )
-            })}
-          </nav>
+          {/* NAVIGATION */}
+          {!isAuthPage && (
+            <nav className="hidden md:flex items-center space-x-1">
+              {navigation.map((item) => {
+                const Icon = item.icon
+                const isActive = pathname === item.href
+                return (
+                  <Link key={item.name} href={item.href}>
+                    <Button
+                      variant="ghost"
+                      className={`relative flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-300 ${
+                        isActive
+                          ? "bg-gradient-to-r from-ai-blue to-ai-green text-white shadow-elegant"
+                          : "text-ai-text-light hover:text-ai-text hover:bg-ai-blue-light/50"
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span className="font-medium">{item.name}</span>
+                      {isActive && (
+                        <div className="absolute inset-0 bg-gradient-to-r from-ai-blue to-ai-green rounded-xl opacity-10"></div>
+                      )}
+                    </Button>
+                  </Link>
+                )
+              })}
+            </nav>
+          )}
 
-          <div className="flex items-center space-x-3">
-            <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 bg-ai-green-light rounded-full">
-              <div className="w-2 h-2 bg-ai-green rounded-full animate-pulse"></div>
-              <span className="text-xs font-medium text-ai-green">Online</span>
+          {/* SIGN UP & SIGN IN BUTTONS */}
+          {!isAuthPage && (
+            <div className="flex items-center space-x-3">
+              <Link href="/auth/signup">
+                <Button
+                  className="bg-gradient-to-r from-ai-blue to-ai-green text-white rounded-full px-4 py-2 shadow-elegant hover:shadow-glow hover:scale-105 transition-transform text-sm"
+                >
+                  Sign Up
+                </Button>
+              </Link>
+              <Link href="/auth">
+                <Button
+                  variant="ghost"
+                  className="border border-ai-border text-ai-text-light rounded-full px-4 py-2 hover:bg-ai-blue-light/30 text-sm"
+                >
+                  Sign In
+                </Button>
+              </Link>
             </div>
-          </div>
+          )}
+          
         </div>
       </div>
     </header>
   )
 }
+

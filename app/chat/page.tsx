@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
+import { chatWithBot } from "@/lib/api";
 
 interface Message {
   id: string
@@ -32,34 +33,37 @@ export default function ChatPage() {
   const [dataSource, setDataSource] = useState("both")
   const [isTyping, setIsTyping] = useState(false)
 
-  const sendMessage = () => {
-    if (!input.trim()) return
+  const sendMessage = async () => {
+    if (!input.trim()) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
       content: input,
       sender: "user",
       timestamp: new Date(),
-    }
+    };
 
-    setMessages((prev) => [...prev, userMessage])
-    setInput("")
-    setIsTyping(true)
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsTyping(true);
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      const response = await chatWithBot(input);
+
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content:
-          "Based on your uploaded documents and our conversation history, I can provide you with a comprehensive answer. Here's what I found that should help resolve your inquiry...",
+        content: response.answer,
         sender: "ai",
         timestamp: new Date(),
-        sources: ["FAQ_Document.pdf", "User_Guide.docx", "Previous_Conversations"],
-      }
-      setMessages((prev) => [...prev, aiMessage])
-      setIsTyping(false)
-    }, 2000)
-  }
+      };
+
+      setMessages((prev) => [...prev, aiMessage]);
+    } catch (err) {
+      console.error("Erreur backend:", err);
+    } finally {
+      setIsTyping(false);
+    }
+  };
 
   const handleFeedback = (messageId: string, feedback: "positive" | "negative") => {
     setMessages((prev) => prev.map((msg) => (msg.id === messageId ? { ...msg, feedback } : msg)))
